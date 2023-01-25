@@ -1,4 +1,7 @@
 # Opdrachtbeschrijving
+TODO
+-fakeserver werkend krijgen. 
+
 
 ## Inleiding
 
