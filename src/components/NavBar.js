@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 function NavBar() {
-  const { isAuth, logout } = useContext(AuthContext);
+  const { isAuth, logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   return (
@@ -19,12 +19,15 @@ function NavBar() {
       </Link>
 
       {isAuth ?
+          <>
+              <span>{user.email}</span>
         <button
           type="button"
           onClick={logout}
         >
           Log uit
         </button>
+          </>
         :
         <div>
           <button

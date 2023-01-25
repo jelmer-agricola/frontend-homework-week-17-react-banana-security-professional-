@@ -1,4 +1,4 @@
-import React, {createContext, useState} from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import jwtDecode from "jwt-decode";
 import axios from "axios";
@@ -9,7 +9,30 @@ function AuthContextProvider({children}) {
     const [isAuth, toggleIsAuth] = useState({
         isAuth: false,
         user: null,
+        status: 'pending',
+
     });
+
+
+    useEffect(() => {
+        const storedToken = localStorage.getItem("token")
+
+        if (storedToken) {
+            const decodedToken = jwtDecode(storedToken)
+
+            fetchData(storedToken, decodedToken.sub)
+        }
+        else{
+            toggleIsAuth({
+                isAuth: false,
+                user: null,
+                status: "done"
+
+            })
+        }
+    }, []);
+
+
     const navigate = useNavigate();
 
     function login(jwt) {
@@ -26,18 +49,20 @@ function AuthContextProvider({children}) {
         try {
             const response = await axios.get(`http://localhost:3000/600/users/${id}`, {
                 headers: {
-                    "Content-Type": "application/json",
+                    " Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 }
             })
             console.log(response)
             toggleIsAuth({
+                ...isAuth,
                 isAuth: true,
                 user: {
                     username: response.data.username,
                     email: response.data.email,
                     id: response.data.id,
                 },
+                status: "done"
 
             })
             navigate('/profile');
@@ -49,13 +74,15 @@ function AuthContextProvider({children}) {
 
 
     function logout(jwt) {
-        console.log('Gebruiker is uitgelogd!');
-        console.log(jwt);
         localStorage.clear();
+        console.log(jwt);
+
         toggleIsAuth({
             isAuth: false,
-            user: null
+            user: null,
+            status: "done"
         });
+        console.log('Gebruiker is uitgelogd!');
         navigate('/');
     }
 
@@ -68,7 +95,7 @@ function AuthContextProvider({children}) {
 
     return (
         <AuthContext.Provider value={contextData}>
-            {children}
+            {isAuth.status === "done" ? children : <p>loading...</p> }
         </AuthContext.Provider>
     );
 }
